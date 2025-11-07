@@ -195,6 +195,8 @@ def admin_authorize():
         except Exception:
             return jsonify({"error": "num is not a number"}), 400
         
+        key_data[Authorization[7:]]["account_balance"] = float(key_data[Authorization[7:]]["account_balance"])
+        
         # 计算余额
         use_balance = round(num / 86400, 2) if round(num / 86400, 2) >= 1 else 1
 
@@ -212,7 +214,7 @@ def admin_authorize():
         with open(f"{file_path}/log/authorize.log", "r", encoding = "utf-8") as log_file:
             log_data = log_file.read()
         with open(f"{file_path}/log/authorize.log", "w", encoding = "utf-8") as file:
-            file.write(f"{log_data}\n[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now_timestamp))}](余额 {balance_now} / {key_data[Authorization[7:]]["account_balance"]}) {key_data[Authorization[7:]]["name"]} 为 {name} 授权 {num} 秒".replace("\\n", ""))
+            file.write(f"{log_data}\n[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now_timestamp))}](余额 {balance_now} / {key_data[Authorization[7:]]["account_balance"]}) {key_data[Authorization[7:]]["name"]} 为 {name} 授权 {num} 秒".replace("\n", ""))
             
         # 判断授权是否到期
         if now_timestamp > authorize_data[name]:
