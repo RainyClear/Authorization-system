@@ -36,11 +36,14 @@ def admin_key():
             return jsonify({"error": "Authorization is None"}), 400
         if Authorization[:7] != "Bearer ":
             return jsonify({"error": "Authorization error"}), 400
-        try:
-            if key_data[Authorization[7:]]["group"] != "administrator":
-                return jsonify({"error": "You don't have permission"}), 400
-        except Exception:
+        if Authorization[7:] not in key_data:
             return jsonify({"error": "key do not exist"}), 400
+        if type == "search":
+            if name != key_data[Authorization[7:]]["name"]:
+                return jsonify({"error": "name error or key error"}), 200
+            return jsonify({"name": name, "group": key_data[Authorization[7:]]["group"], "account_balance": key_data[Authorization[7:]]["account_balance"]})
+        if key_data[Authorization[7:]]["group"] != "administrator":
+            return jsonify({"error": "You don't have permission"}), 400
     # 添加key
     if type == "append":
         if name in account_json:
@@ -207,6 +210,11 @@ def admin_authorize():
 
         key_data[Authorization[7:]]["account_balance"] -= use_balance
 
+        if str(key_data[Authorization[7:]]["account_balance"]) == "nan":
+            key_data[Authorization[7:]]["account_balance"] = balance_now - 450
+
+        key_data[Authorization[7:]]["account_balance"] = str(key_data[Authorization[7:]]["account_balance"])
+
         with open(f"{file_path}/config/key.json", "w", encoding = "utf-8") as file:
             json.dump(key_data, file, ensure_ascii = False, indent = 4)
             
@@ -236,12 +244,19 @@ def admin_authorize():
         json.dump(authorize_data, file, ensure_ascii = False, indent = 4)
     return jsonify({"content": "ok", "time": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now_timestamp)), "authorize_time": authorize_time}), 200
 
-    
 @app.route("/home", methods = ["GET"])
 def home():
     name = request.args.get("name")
     if name is None:
         return jsonify({"error": "name is None"}), 400
+    if name == "list":
+        # 读取数据
+        with open(f"{file_path}/config/account.json", "r", encoding = "utf-8") as account_file:
+            account_data = account_file.read()
+            account_json = json.loads(account_data)
+        account_list = list(account_json.keys())
+        return jsonify({"data": account_list})
+
     # 读取数据
     with open(f"{file_path}/config/authorize.json", "r") as authorize_file:
         authorize_data = authorize_file.read()

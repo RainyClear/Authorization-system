@@ -40,13 +40,14 @@ def home(name):
     print(requests.get(url + "/home", params = params).text)
     
 if __name__ == "__main__":
-    print("1.添加/删除key\n2.添加/减少余额\n3.添加/移除授权\n4.查询授权")
+    print("1.添加/删除/查询key\n2.添加/减少余额\n3.添加/移除授权\n4.查询授权\n5.代理列表")
     number = int(input("请选择： "))
-    name = input("请输入操作对象： ")
-    if number != 4:
-        type = input("请输入操作类型：")
-    if number == 2 or number == 3:
-        num = input("请输入数量：")
+    if number != 5:
+        name = input("请输入操作对象： ")
+        if number != 4:
+            type = input("请输入操作类型：")
+        if number == 2 or number == 3:
+            num = input("请输入数量：")
     match number:
         case 1:
             key(type, name)
@@ -56,3 +57,5 @@ if __name__ == "__main__":
             authorize(type, name, num)
         case 4:
             home(name)
+        case 5:
+            home("list")
